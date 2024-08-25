@@ -1,0 +1,54 @@
+load("@build_bazel_rules_swift//swift:swift.bzl", "swift_library")
+load("@build_bazel_rules_apple//apple:ios.bzl", "ios_application")
+load("@build_bazel_rules_ios//rules:framework.bzl", "apple_framework")
+load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
+
+ios_application(
+    name = "HelloWorldSwift",
+    app_icons = glob(["Resources/PhoneAppIcon.xcassets/**"]),
+    bundle_id = "com.example.hello-world-swift",
+    families = [
+        "iphone",
+        "ipad",
+    ],
+    infoplists = ["Resources/Info.plist"],
+    minimum_os_version = "15.0",
+    deps = select({ 
+        ":swift_library": [":sources_swift_library"],
+        ":apple_framework": [":sources_apple_framework"],
+    }),
+)
+
+swift_library(
+    name = "sources_swift_library",
+    srcs = [
+        "Sources/BazelApp.swift",
+    ],
+)
+
+apple_framework(
+    name = "sources_apple_framework",
+    srcs = [
+        "Sources/BazelApp.swift",
+    ],
+)
+
+string_flag(
+    name = "test_case",
+    values = ["swift_library", "apple_framework"],
+    build_setting_default = "swift_library",
+)
+
+config_setting(
+    name = "swift_library",
+    flag_values = {
+        ":test_case": "swift_library",
+    },
+)
+
+config_setting(
+    name = "apple_framework",
+    flag_values = {
+        ":test_case": "apple_framework",
+    },
+)
